@@ -32,7 +32,7 @@ cd $root
 root="$(dirname "$(readlink -f "$0")")"
 NJOB=4
 
-root_repo_list=${ROOT_LIST:-"buildroot riscv-gnu-toolchain riscv-pk linux riscv-isa-sim"}
+root_repo_list=${ROOT_LIST:-"buildroot riscv-gnu-toolchain axpike-pk linux axpike-isa-sim"}
 toolchain_repo_list=${TOOLCHAIN_LIST:-"binutils gcc glibc newlib gdb"}
 
 fetch_repo "$root/repo" "$root_repo_list" "--jobs $NJOB"

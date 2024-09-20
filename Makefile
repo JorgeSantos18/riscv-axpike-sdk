@@ -33,8 +33,8 @@ vmlinux_stripped := $(linux_wrkdir)/vmlinux-stripped
 linux_image := $(linux_wrkdir)/arch/riscv/boot/Image
 
 DTS ?= $(abspath conf/$(BOARD).dts)
-pk_srcdir := $(srcdir)/riscv-pk
-pk_wrkdir := $(wrkdir)/riscv-pk
+pk_srcdir := $(srcdir)/axpike-pk
+pk_wrkdir := $(wrkdir)/axpike-pk
 bbl := $(pk_wrkdir)/bbl
 pk  := $(pk_wrkdir)/pk
 
@@ -42,9 +42,9 @@ opensbi_srcdir := $(srcdir)/opensbi
 opensbi_wrkdir := $(wrkdir)/opensbi
 fw_jump := $(opensbi_wrkdir)/platform/generic/firmware/fw_jump.elf
 
-spike_srcdir := $(srcdir)/riscv-isa-sim
-spike_wrkdir := $(wrkdir)/riscv-isa-sim
-spike := $(toolchain_dest)/bin/spike
+spike_srcdir := $(srcdir)/axpike-isa-sim
+spike_wrkdir := $(wrkdir)/axpike-isa-sim
+spike := $(toolchain_dest)/bin/axpike
 
 qemu_srcdir := $(srcdir)/riscv-gnu-toolchain/qemu
 qemu_wrkdir := $(wrkdir)/qemu

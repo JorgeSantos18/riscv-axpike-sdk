@@ -7,12 +7,12 @@
 [submodule "linux"]
 	path = repo/linux
 	url = https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-[submodule "riscv-pk"]
-	path = repo/riscv-pk
-	url = https://github.com/riscv/riscv-pk
-[submodule "riscv-isa-sim"]
-	path = repo/riscv-isa-sim
-	url = https://github.com/riscv/riscv-isa-sim
 [submodule "opensbi"]
 	path = repo/opensbi
 	url = https://github.com/riscv-software-src/opensbi
+[submodule "repo/axpike-isa-sim"]
+	path = repo/axpike-isa-sim
+	url = git@github.com:JorgeSantos18/axpike-isa-sim.git
+[submodule "repo/axpike-pk"]
+	path = repo/axpike-pk
+	url = https://github.com/VArchC/axpike-pk.git
