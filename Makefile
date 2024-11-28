@@ -4,7 +4,7 @@ RISCV ?= $(CURDIR)/toolchain
 PATH := $(RISCV)/bin:$(PATH)
 ISA ?= rv64imafdc_zifencei_zicsr
 ABI ?= lp64d
-BL ?= bbl
+BL ?= opensbi
 BOARD ?= spike
 
 topdir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
@@ -33,6 +33,7 @@ vmlinux_stripped := $(linux_wrkdir)/vmlinux-stripped
 linux_image := $(linux_wrkdir)/arch/riscv/boot/Image
 
 DTS ?= $(abspath conf/$(BOARD).dts)
+DTB ?= $(abspath conf/$(BOARD).dtb)
 pk_srcdir := $(srcdir)/axpike-pk
 pk_wrkdir := $(wrkdir)/axpike-pk
 bbl := $(pk_wrkdir)/bbl
@@ -134,7 +135,7 @@ $(linux_image): $(vmlinux)
 linux-menuconfig: $(linux_wrkdir)/.config
 	$(MAKE) -C $(linux_srcdir) O=$(dir $<) ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- menuconfig
 	$(MAKE) -C $(linux_srcdir) O=$(dir $<) ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- savedefconfig
-	# cp $(dir $<)/defconfig conf/linux_defconfig
+	cp $(dir $<)/defconfig conf/linux_defconfig
 
 $(bbl): $(pk_srcdir) $(vmlinux_stripped) $(DTS)
 	rm -rf $(pk_wrkdir)
@@ -160,7 +161,7 @@ $(pk): $(pk_srcdir) $(RISCV)/bin/$(target_newlib)-gcc
 $(fw_jump): $(opensbi_srcdir) $(linux_image) $(RISCV)/bin/$(target_linux)-gcc
 	rm -rf $(opensbi_wrkdir)
 	mkdir -p $(opensbi_wrkdir)
-	$(MAKE) -C $(opensbi_srcdir) FW_PAYLOAD_PATH=$(linux_image) PLATFORM=generic O=$(opensbi_wrkdir) CROSS_COMPILE=riscv64-unknown-linux-gnu-
+	$(MAKE) -C $(opensbi_srcdir) FW_PAYLOAD_PATH=$(linux_image) FW_FDT_PATH=$(DTB) PLATFORM=generic O=$(opensbi_wrkdir) CROSS_COMPILE=$(RISCV)/bin/$(target_linux)-
 
 $(spike): $(spike_srcdir) 
 	rm -rf $(spike_wrkdir)
@@ -202,7 +203,7 @@ mrproper:
 
 ifeq ($(BL),opensbi)
 spike: $(fw_jump) $(spike)
-	$(spike) --isa=$(ISA)_zicntr_zihpm --kernel $(linux_image) $(fw_jump)
+	$(spike) -m4096 --isa=$(ISA)_zicntr_zihpm --kernel $(linux_image) $(fw_jump) 
 
 qemu: $(qemu) $(fw_jump)
 	$(qemu) -nographic -machine virt -cpu rv64,sv57=on -m 2048M -bios $(fw_jump) -kernel $(linux_image)
