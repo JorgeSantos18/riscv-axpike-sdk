@@ -6,7 +6,7 @@
   compatible = "ucbbar,spike-bare-dev";
   model = "ucbbar,spike-bare";
   chosen {
-    bootargs = "console=hvc0 earlycon=sbi nokaslr";
+    bootargs = "console=hvc0 earlycon=sbi debug numa_debug nokaslr earlyprintk";
   };
   cpus {
     #address-cells = <1>;
@@ -15,14 +15,15 @@
     CPU0: cpu@0 {
       device_type = "cpu";
       reg = <0>;
+
       status = "okay";
       compatible = "riscv";
+      numa-node-id = <0>;
       riscv,isa = "rv64imafdc_zicntr_zihpm";
       mmu-type = "riscv,sv57";
       riscv,pmpregions = <16>;
       riscv,pmpgranularity = <4>;
       clock-frequency = <1000000000>;
-      numa-node-id = <0>;
       CPU0_intc: interrupt-controller {
         #address-cells = <2>;
         #interrupt-cells = <1>;
@@ -35,20 +36,15 @@
 
   memory@80000000 {
     device_type = "memory";
-    reg = <0x0 0x80000000 0x0 0x80000000>;
+    reg = <0x0 0x80000000 0x1 0x80000000>; // 6GB starting at 0x80000000
     numa-node-id = <0>;
-  };
-
-  memory@100000000 {
-    device_type = "memory";
-    reg = <0x1 0x00000000 0x0 0x80000000>;
-    numa-node-id = <1>;
   };
 
   reserved-memory {
           #address-cells = <0x02>;
           #size-cells = <0x02>;
           ranges;
+
 
           mmode_resv1@80020000 {
                   reg = <0x00 0x80020000 0x00 0x20000>;
@@ -60,6 +56,16 @@
                   no-map;
           };
   };
+
+  memory@200000000 {
+    device_type = "memory";
+    reg = <0x2 0x00000000 0x0 0x80000000>; // 2GB starting at 0x98000000
+    numa-node-id = <1>;
+  };
+
+
+
+
   soc {
     #address-cells = <2>;
     #size-cells = <2>;
@@ -69,7 +75,6 @@
       compatible = "riscv,clint0";
       interrupts-extended = <&CPU0_intc 3 &CPU0_intc 7 >;
       reg = <0x0 0x2000000 0x0 0xc0000>;
-      numa-node-id = <0>;
     };
     PLIC: plic@c000000 {
       compatible = "riscv,plic0";
@@ -80,7 +85,6 @@
       riscv,max-priority = <0xf>;
       #interrupt-cells = <1>;
       interrupt-controller;
-      numa-node-id = <0>;
     };
     SERIAL0: ns16550@10000000 {
       compatible = "ns16550a";
@@ -90,7 +94,12 @@
       reg = <0x0 0x10000000 0x0 0x100>;
       reg-shift = <0x0>;
       reg-io-width = <0x1>;
-      numa-node-id = <0>;
+    };
+    virtio9p: virtio@40011000 {
+      compatible = "virtio,mmio";
+      interrupt-parent = <&PLIC>;
+      interrupts = <2>;
+      reg = <0x0 0x40011000 0x0 0x1000>;
     };
   };
   htif {
@@ -98,9 +107,9 @@
   };
 
   distance-map {
-		compatible = "numa-distance-map-v1";
-		distance-matrix = <0 0 10>,
-				  <0 1 20>,
-				  <1 1 10>;
-	};
+    compatible = "numa-distance-map-v1";
+    distance-matrix = <0 0 10>,
+                      <0 1 20>,
+                      <1 1 10>;
+  };
 };

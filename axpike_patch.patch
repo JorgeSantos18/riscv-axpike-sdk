@@ -1,0 +1,34 @@
+diff --git a/adele/adele.mk.in b/adele/adele.mk.in
+index 0136c4d..e9e1982 100644
+--- a/adele/adele.mk.in
++++ b/adele/adele.mk.in
+@@ -36,10 +36,9 @@ adele_gen_srcs = \
+ 	axpike_setup.cc \
+ 	axpike_wrappers.cc \
+ 
+-insn_approx.list axpike_wrappers.cc axpike_wrappers.h axpike_setup.cc $(src_dir)/adele/axpike_iface.h: acadp insn_list.h $(src_dir)/adele/adf/*.adf axpike_models.cc
++insn_approx.list axpike_wrappers.cc axpike_wrappers.h axpike_setup.cc $(src_dir)/adele/axpike_iface.h: acadp insn_list.h $(src_dir)/adele/adf/*.adf axpike_models.cc insn_count.h
+ 	mkdir -p insns_approx
+ 	./acadp insn_list.h $(src_dir)/adele/adf/*.adf
+-	cp axpike_iface.h ../adele/
+ 
+ axpike_models.cc: $(src_dir)/adele/adf/*.cc
+ 	@echo "" > axpike_models.cc
+diff --git a/adele/adf b/adele/adf
+--- a/adele/adf
++++ b/adele/adf
+@@ -1 +1 @@
+-Subproject commit c08e938be15b42bcff7c0a3ed9af3a2a5fbdc556
++Subproject commit c08e938be15b42bcff7c0a3ed9af3a2a5fbdc556-dirty
+diff --git a/adele/axpike_control.cc b/adele/axpike_control.cc
+index 861c0d7..793f6b1 100644
+--- a/adele/axpike_control.cc
++++ b/adele/axpike_control.cc
+@@ -17,6 +17,7 @@ AxPIKE::Control::Control(processor_t* _p, std::vector<std::string> adele_activat
+   dc_behavior(~0x0ULL) {
+     this->initModels();
+     this->available_approx[PRV_M] = (0x1ULL << this->approxes.size()) - 1;
++    this->available_approx[PRV_U] = (0x1ULL << this->approxes.size()) - 1;
+ 
+ 
+     for (std::string& a : adele_activate) {

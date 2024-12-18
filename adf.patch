@@ -1,0 +1,49 @@
+diff --git a/AxRAM.cc b/AxRAM.cc
+index f06c4e3..c6dadae 100644
+--- a/AxRAM.cc
++++ b/AxRAM.cc
+@@ -18,6 +18,11 @@ unsigned long instrs_last_log   = 0;
+     return; \
+   }
+ 
++#define NON_APROX_REGION_PROTECTION \
++  if (source->paddress <= 0x200000000ULL) { \
++    return; \
++  }
++
+ const char *prvs[4] = {"U", "S", "HS", "M"};
+ 
+ bool RandomProbability(double probability) {
+@@ -56,9 +61,11 @@ bool UniformBitFlip(double probability,
+ 
+ DM BitFlipRead(word sp, processor_t* p, source_t* source, void* data){
+ 
++
++
+   memtracer_log_t memtracer_log = source->memtracer_log;
+   bool loggable = memtracer_log.l2_miss;//All accesses to LLC
+-  bool exposed_to_error = memtracer_log.l2_miss && p->get_state()->prv == PRV_U;//Accesses to LLC of user level
++  bool not_exposed_to_error = p->get_state()->prv != PRV_U;//Accesses to LLC of user level
+ 
+ 
+   if (loggable) {
+@@ -74,12 +81,18 @@ DM BitFlipRead(word sp, processor_t* p, source_t* source, void* data){
+   }
+ 
+ 
++  fprintf(stderr, "Aqui x1 %lx \n", source->paddress);
+   //Verify if source is not DRAM or Privilege is not user
+-  if (!exposed_to_error)
++  if (not_exposed_to_error)
+     return;
+ 
++  fprintf(stderr, "Aqui x2 %lx \n", source->paddress);
+   STACK_PROTECTION
+ 
++  fprintf(stderr, "Aqui x3 %lx \n", source->paddress);
++  NON_APROX_REGION_PROTECTION
++
++  fprintf(stderr, "Aqui x4 %lx \n", source->paddress);
+ 
+   auto adele_params = p->get_adele_params();
+ 

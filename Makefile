@@ -100,6 +100,8 @@ buildroot-menuconfig: $(buildroot_initramfs_wrkdir)/.config $(buildroot_srcdir)
 $(buildroot_initramfs_sysroot): $(buildroot_initramfs_tar)
 	mkdir -p $(buildroot_initramfs_sysroot)
 	tar -xpf $< -C $(buildroot_initramfs_sysroot) --exclude ./dev --exclude ./usr/share/locale
+	mkdir -p $(buildroot_initramfs_sysroot)/home
+	cp -r $(topdir)/test $(buildroot_initramfs_sysroot)/home/
 
 $(linux_wrkdir)/.config: $(linux_defconfig) $(linux_srcdir) $(toolchain_dest)/bin/$(target_linux)-gcc
 	mkdir -p $(dir $@)
@@ -203,7 +205,10 @@ mrproper:
 
 ifeq ($(BL),opensbi)
 spike: $(fw_jump) $(spike)
-	$(spike) -m4096 --isa=$(ISA)_zicntr_zihpm --kernel $(linux_image) $(fw_jump) 
+#	$(spike) -m8192 --adele=mem_read_prob:0.00002,linesz:2 --adele-activate=0:AXRAM  --extlib=$(topdir)/libvirtio9pdiskdevice.so  --extlib=$(topdir)/libvirtionetdevice.so --device="virtio9p,path=$(topdir)/test,tag=hostshare" \
+#   --device="virtionet,driver=user,hostfwd=tcp::10022-:22"  --dtb=$(DTB) --isa=$(ISA)_zicntr_zihpm --kernel $(linux_image) $(fw_jump)  
+	$(spike) -m8192 --adele=mem_read_prob:0.00002,linesz:4  --adele-activate=0:AXRAM --extlib=$(topdir)/libvirtio9pdiskdevice.so  --device="virtio9p,path=$(topdir)/test,tag=hostshare" \
+    --dtb=$(DTB) --isa=$(ISA)_zicntr_zihpm --kernel $(linux_image) $(fw_jump)  
 
 qemu: $(qemu) $(fw_jump)
 	$(qemu) -nographic -machine virt -cpu rv64,sv57=on -m 2048M -bios $(fw_jump) -kernel $(linux_image)
